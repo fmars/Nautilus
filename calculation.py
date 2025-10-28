@@ -24,7 +24,6 @@ class Calculation:
         self.outer_angles = self.get_outer_angles()
         self.d_rho, self.sd_rho, self.rots = self.get_rotations()
         
-        # --- MODIFICATION: Removed self.aires ---
         # self.aires = self.get_aires() 
         self.pis = self.get_approx_pi() # approximation pi dans excel
 
