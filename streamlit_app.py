@@ -748,13 +748,13 @@ def main():
     with tabs[5]: 
         try:
             # Add download button for the PDF
-            with open("paper.pdf", "rb") as pdf_file:
+            with open("./paper/paper.pdf", "rb") as pdf_file:
                 PDFbyte = pdf_file.read()
 
             st.download_button(
                 label="Download Paper (PDF)",
                 data=PDFbyte,
-                file_name="paper.pdf",
+                file_name="nautilus-paper.pdf",
                 mime="application/pdf"
             )
         except FileNotFoundError:
