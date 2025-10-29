@@ -774,7 +774,7 @@ def main():
             # Assume paper images are in the paper folder
             image_path = f"./paper/paper-{i}.jpg" 
             try:
-                st.image(image_path, use_column_width='always')
+                st.image(image_path, use_container_width ='True')
             except Exception: 
                 # Catch FileNotFoundError or other image loading errors
                 st.warning(f"Could not load page {i} ({image_path}).")
