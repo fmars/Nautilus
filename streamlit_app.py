@@ -39,8 +39,10 @@ class Plotter:
             self.frame_color = "#0a0a0a"
             self.text_color = "#fafafa"
         else:
-            self.frame_color = "#ffffff"
-            self.text_color = "#0a0a0a"
+            # --- MODIFICATION: Set 'light' mode background as requested ---
+            self.frame_color = "#262730" # Was #ffffff
+            self.text_color = "#fafafa" # Must change text for visibility
+            # --- END MODIFICATION ---
 
     def plot_fig(self):
         """Generates and returns the Matplotlib figure based on user options."""
@@ -439,11 +441,11 @@ def main():
     # #GithubIcon {visibility: hidden;}
     # footer {visibility: hidden;}
     hide_streamlit_style = """
-            <style>
-            #GithubIcon {visibility: hidden;}
-            footer {visibility: hidden;}
-            </style>
-            """
+                <style>
+                #GithubIcon {visibility: hidden;}
+                footer {visibility: hidden;}
+                </style>
+                """
     st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
     st.markdown("""
@@ -653,6 +655,17 @@ def main():
         ds_bezier = st.slider("Spiral Offset (ds)", 1, 2, 1, key="ds_bezier")
         iter_bezier = st.slider("Bezier Subdivisions", 0, 8, 4, key="iter_bezier", help="Number of recursive subdivisions (0 = control points only).")
         show_controls = st.checkbox("Show Control Points", value=True)
+        
+        # --- MODIFICATION: Define Bezier plot colors based on mode_choice ---
+        if mode_choice == "dark":
+            bezier_frame_color = "#0a0a0a"
+            bezier_text_color = "#fafafa"
+            bezier_axis_color = "#fafafa"
+        else: # 'light' mode
+            bezier_frame_color = "#262730" # Per user request
+            bezier_text_color = "#fafafa" # Must be light for dark bg
+            bezier_axis_color = "#fafafa" # Must be light for dark bg
+        # --- END MODIFICATION ---
 
         try:
             # --- Optimization: Call cached function ---
@@ -700,7 +713,7 @@ def main():
             if show_controls and hasattr(data_bezier, 'pts') and data_bezier.pts:
                 # Filter valid point before processing
                 valid_pts = [p for p in data_bezier.pts if isinstance(p, (tuple, list)) and len(p) == 3 and 
-                                    all(isinstance(pt, (tuple, list)) and len(pt)==2 for pt in p)]
+                                     all(isinstance(pt, (tuple, list)) and len(pt)==2 for pt in p)]
                 if valid_pts:
                     p1s_x = [p[1][0] for p in valid_pts]
                     p1s_y = [p[1][1] for p in valid_pts]
@@ -717,10 +730,14 @@ def main():
                         ax_bezier.plot([p[0][0], p[1][0]], [p[0][1], p[1][1]], color='gray', lw=0.5, ls=':', zorder=3)
                         ax_bezier.plot([p[1][0], p[2][0]], [p[1][1], p[2][1]], color='gray', lw=0.5, ls=':', zorder=3)
 
-            fig_bezier.patch.set_facecolor("white")
-            ax_bezier.set_facecolor("white")
+            # --- MODIFICATION: Apply dynamic background/axis colors ---
+            fig_bezier.patch.set_facecolor(bezier_frame_color)
+            ax_bezier.set_facecolor(bezier_frame_color)
+            # --- END MODIFICATION ---
+
             ax_bezier.set_xlim(plot_lims)
             ax_bezier.set_ylim(plot_lims)
+            
             # Center axes only if center is reasonably calculated
             if x_center is not None and y_center is not None:
                 try:
@@ -729,14 +746,24 @@ def main():
                 except ValueError: # Handle cases where center might be outside limits
                     ax_bezier.spines['left'].set_position('zero')
                     ax_bezier.spines['bottom'].set_position('zero')
-
+            
+            # --- MODIFICATION: Set axis/arrow/legend color for visibility ---
+            ax_bezier.spines['left'].set_color(bezier_axis_color)
+            ax_bezier.spines['bottom'].set_color(bezier_axis_color)
             ax_bezier.spines['right'].set_color('none')
             ax_bezier.spines['top'].set_color('none')
-            # Check limits before plotting arrows
+            
+            # Set arrow colors
             if plot_lims[0] is not None and plot_lims[1] is not None and y_center is not None and x_center is not None:
-                ax_bezier.plot(plot_lims[1], y_center, ">", color='black', clip_on=False)
-                ax_bezier.plot(x_center, plot_lims[1], "^", color='black', clip_on=False)
-            ax_bezier.legend()
+                ax_bezier.plot(plot_lims[1], y_center, ">", color=bezier_axis_color, clip_on=False)
+                ax_bezier.plot(x_center, plot_lims[1], "^", color=bezier_axis_color, clip_on=False)
+            
+            # Set legend text color
+            legend = ax_bezier.legend()
+            if legend:
+                for text in legend.get_texts():
+                    text.set_color(bezier_text_color)
+            # --- END MODIFICATION ---
             
             st.pyplot(fig_bezier) 
 
