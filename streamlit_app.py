@@ -751,8 +751,6 @@ def main():
         except Exception as e:
             st.error(f"Error reading PDF for download: {e}")
 
-        st.markdown("---") # Add a separator
-
         # Display 6 JPGs
         st.markdown("### Paper Preview")
         
