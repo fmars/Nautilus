@@ -11,17 +11,29 @@ from matplotlib.collections import LineCollection, PatchCollection
 from io import BytesIO
 import base64 # To embed pdf
 from collections import deque
+# import zipfile # Removed zip functionality
 
 from calculation import Calculation
 
+
+# Removed create_zip_of_figures function
+
+@st.cache_data
+def get_calculation_data(n, ds, reverse, bezier_iterations=4):
+    """
+    Cached function to create and return the main Calculation data object.
+    Streamlit will only run this if the input arguments change.
+    """
+    return Calculation(n, ds, bezier_iterations=bezier_iterations, reverse=reverse)
 
 
 class Plotter:
     """
     Plot the figure with matplotlib and create different tabs in the Streamlit app.
     """
-    def __init__(self, info):
+    def __init__(self, info, data):
         self.info = info
+        self.data = data # Use pre-calculated data
         self.lbl_type = "sans-serif"
         
         # Set background and text color based on mode
@@ -34,21 +46,8 @@ class Plotter:
 
     def plot_fig(self):
         """Generates and returns the Matplotlib figure based on user options."""
-        # Pass the 'reverse' flag to Calculation
-        try:
-            self.data = Calculation(
-                self.info["n"], 
-                self.info["ds"], 
-                reverse=self.info["reverse"]
-            )
-        except Exception as e:
-            st.error(f"Error during calculations: {e}")
-            # Return empty figure or handle error appropriately
-            fig, ax = plt.subplots(figsize=(8, 8))
-            ax.text(0.5, 0.5, "Error in Calculation", ha='center', va='center')
-            ax.axis('off')
-            return fig, None # Return None for data if calculation fails
-
+        # Data is now passed in __init__, so we remove the Calculation call
+        
         # Initialize plot
         self.init_fig()
         self.init_flags()
@@ -170,24 +169,40 @@ class Plotter:
 
     def plot_polygon(self, colors):
         if not self.show_polygone or not hasattr(self.data, 'df_2') or self.data.df_2 is None: return
-        # Ensure colors list matches ns length if needed
         safe_colors = colors[:len(self.data.ns)] if hasattr(self.data, 'ns') else []
         
         if self.rempli_polygone:
+            # --- Optimization: Batch drawing ---
+            patches_by_zorder = {}
             for i, c in zip(self.data.ns, safe_colors):
                 if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
-                    self.ax.fill(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
-                                    color=c, alpha=1, zorder=self.data.n-i) # dropna added
+                    x = self.data.df_2[f"{i}-gon X"].dropna()
+                    y = self.data.df_2[f"{i}-gon Y"].dropna()
+                    if len(x) > 0 and len(x) == len(y):
+                        z = self.data.n - i
+                        if z not in patches_by_zorder:
+                            patches_by_zorder[z] = {'polys': [], 'colors': []}
+                        patches_by_zorder[z]['polys'].append(list(zip(x, y)))
+                        patches_by_zorder[z]['colors'].append(c)
+
+            for z in sorted(patches_by_zorder.keys()):
+                data = patches_by_zorder[z]
+                pc = PatchCollection([plt.Polygon(p) for p in data['polys']], facecolors=data['colors'], alpha=1, zorder=z)
+                self.ax.add_collection(pc)
+            # --- End Optimization ---
+
         if self.contour:
             for i in self.data.ns:
                  if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
                     self.ax.plot(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
                                     color=self.couleur, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
         else:
-            for i, c in zip(self.data.ns, safe_colors):
-                 if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
-                    self.ax.plot(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
-                                    color=c, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
+            # Only draw lines if not filling AND not custom contour
+            if not self.rempli_polygone:
+                for i, c in zip(self.data.ns, safe_colors):
+                     if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
+                        self.ax.plot(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
+                                        color=c, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
         self.ax.autoscale_view()
 
     def plot_circle_inscribed(self, colors):
@@ -195,11 +210,15 @@ class Plotter:
          transp = 0.6 if self.rempli_polygone and self.show_polygone else 1
          contour_colors = [self.couleur] * len(colors) if self.contour else colors
          min_len = min(len(self.data.centres), len(self.data.in_radii), len(colors), len(contour_colors))
+         
+         # --- Optimization: Batch drawing ---
+         patches = []
          for pt, in_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.in_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
-             # Ensure pt is a valid coordinate pair and in_r is a number
              if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(in_r, (int, float)) and in_r >= 0:
                  c = plt.Circle((pt[0] * -1, pt[1] * -1), in_r, fill=self.rempli_ce_in, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
-                 self.ax.add_patch(c)
+                 patches.append(c)
+         self.ax.add_collection(PatchCollection(patches, match_original=True))
+         # --- End Optimization ---
          self.ax.autoscale_view()
 
 
@@ -208,10 +227,15 @@ class Plotter:
          transp = 0.6 if self.rempli_polygone and self.show_polygone else 1
          contour_colors = [self.couleur] * len(colors) if self.contour else colors
          min_len = min(len(self.data.centres), len(self.data.out_radii), len(colors), len(contour_colors))
+         
+         # --- Optimization: Batch drawing ---
+         patches = []
          for pt, out_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.out_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
               if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(out_r, (int, float)) and out_r >= 0:
                  c = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
-                 self.ax.add_patch(c)
+                 patches.append(c)
+         self.ax.add_collection(PatchCollection(patches, match_original=True))
+         # --- End Optimization ---
          self.ax.autoscale_view()
 
 
@@ -222,12 +246,16 @@ class Plotter:
              transp_inscrit = transp_circonscrit = 0.6
          contour_colors = [self.couleur] * len(colors) if self.contour else colors
          min_len = min(len(self.data.centres), len(self.data.in_radii), len(self.data.out_radii), len(colors), len(contour_colors))
+         
+         # --- Optimization: Batch drawing ---
+         patches = []
          for pt, in_r, out_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.in_radii[:min_len], self.data.out_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
              if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(in_r, (int, float)) and in_r >= 0 and isinstance(out_r, (int, float)) and out_r >= 0:
                  c_in = plt.Circle((pt[0] * -1, pt[1] * -1), in_r, fill=self.rempli_ce_in, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp_inscrit, zorder=self.data.n - i)
                  c_out = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp_circonscrit, zorder=self.data.n - i - 1)
-                 self.ax.add_patch(c_in)
-                 self.ax.add_patch(c_out)
+                 patches.extend([c_in, c_out]) # Add both circles
+         self.ax.add_collection(PatchCollection(patches, match_original=True))
+         # --- End Optimization ---
          self.ax.autoscale_view()
 
 
@@ -426,10 +454,14 @@ def main():
                     padding-top: 2rem;
                 }
         </style>
-        """, unsafe_allow_html=True)
+        """, 
+        unsafe_allow_html=True
+    )
 
     # Initialize session state for history
     st.session_state.setdefault('figure_history', deque(maxlen=21))
+    # Removed session state for tab content visibility
+
 
     # Sidebar for choosing the parameters
     with st.sidebar:
@@ -437,31 +469,31 @@ def main():
         st.caption("Made by *Maxime Chevillard*") 
         st.header("Parameters") 
 
-        n_sides = st.slider("Number of sides (n)", min_value=3, max_value=100, value=20, step=1)
+        n_sides = st.slider("Number of sides (n)", min_value=3, max_value=100, value=50, step=1)
         ds_offset = st.slider("Spiral offset (ds)", min_value=0, max_value=3, value=1, step=1)
 
         theme_options = ["Random 1", "Random 2", "Spectrum", "Twilight", "Binary", "Flag", "Terrain", "Ocean", "Cividis", "Clown"]
         theme_choice = st.selectbox("Color Theme", theme_options)
 
         display_options = ["Polygon", "Inscribed Circle", "Circumscribed Circle", "Polygon Spiral", "Graph", "Bézier Curve", "Circle", "Vertex", "Segment", "Point"]
-        display_final_choices = st.multiselect("Elements to Display", display_options, default=["Polygon", "Polygon Spiral"])
+        display_final_choices = st.multiselect("Elements to Display", display_options, default=["Graph", "Vertex"])
 
         fillable_options = [opt for opt in ["Polygon", "Inscribed Circle", "Circumscribed Circle"] if opt in display_final_choices]
         remplissage_final_choices = []
         if fillable_options:
             remplissage_final_choices = st.multiselect("Elements to Fill", fillable_options, default=fillable_options)
         
-        st.markdown("---")
+        
         contour_choice = st.checkbox("Add Custom Contour")
         reverse_choice = st.checkbox("Reverse Rotation", value=False)
         
         contour_color = "#000000"
         if contour_choice:
-            contour_color = st.color_picker("Contour Color", '#FF5733')
+            contour_color = st.color_picker("Contour Color", '#5F3CE0')
         
         mode_choice = st.radio("Background Mode", ["light", "dark"], index=0)
 
-        st.markdown("---")
+        
         generate_button = st.button("Generate", width='stretch')
 
     tabs = st.tabs([
@@ -483,8 +515,18 @@ def main():
             }
             with st.spinner('Generating your masterpiece...'):
                 try:
-                    plotter_instance = Plotter(info_dict)
-                    fig, data = plotter_instance.plot_fig()
+                    # --- Optimization: Call cached function ---
+                    data = get_calculation_data(
+                        n=info_dict["n"], 
+                        ds=info_dict["ds"], 
+                        reverse=info_dict["reverse"]
+                    )
+                    # --- End Optimization ---
+                    
+                    # Pass data to plotter
+                    plotter_instance = Plotter(info_dict, data)
+                    fig, data = plotter_instance.plot_fig() # plot_fig no longer calculates
+                    
                     # Check if fig is valid before storing
                     if fig is not None:
                         st.session_state.fig = fig
@@ -521,51 +563,61 @@ def main():
             st.info("Adjust the settings in the sidebar and click 'Generate' to create your image.")
 
     with tabs[1]: # History
-        if 'figure_history' in st.session_state and st.session_state.figure_history:
-            history_list = list(st.session_state.figure_history) # Convert deque to list for easier indexing
-            num_figures = len(history_list)
-            num_rows = (num_figures + 2) // 3 # Calculate rows needed
+        st.info("Click 'Update' to display the 21 most recent figures.") 
+        
+        # Removed download button
+        
+        if st.button("Update", key="history_update_button"):
+            # Reverted logic: Content is now inside the button click
+            if 'figure_history' in st.session_state and st.session_state.figure_history:
+                history_list = list(st.session_state.figure_history) # Convert deque to list for easier indexing
+                num_figures = len(history_list)
+                num_rows = (num_figures + 2) // 3 # Calculate rows needed
 
-            for i in range(num_rows):
-                cols = st.columns(3)
-                for j in range(3):
-                    fig_index = i * 3 + j
-                    if fig_index < num_figures:
-                        with cols[j]:
-                            try:
-                                st.pyplot(history_list[fig_index], width="stretch")
-                            except Exception as e:
-                                st.error(f"Error displaying history figure {fig_index+1}: {e}")
-                    else:
-                        # Add empty space in the last row if needed
-                        with cols[j]:
-                            st.empty()
-        else:
-            st.info("No figures generated yet in this session.")
+                for i in range(num_rows):
+                    cols = st.columns(3)
+                    for j in range(3):
+                        fig_index = i * 3 + j
+                        if fig_index < num_figures:
+                            with cols[j]:
+                                try:
+                                    st.pyplot(history_list[fig_index], width="stretch")
+                                except Exception as e:
+                                    st.error(f"Error displaying history figure {fig_index+1}: {e}")
+                        else:
+                            # Add empty space in the last row if needed
+                            with cols[j]:
+                                st.empty()
+            else:
+                st.info("No figures generated yet in this session.")
 
     # Data tab
     with tabs[2]: # Data
 
-        if 'data' in st.session_state and st.session_state.data is not None:
-            st.markdown("### General Polygon Information")
-            # Check if df_1 exists and is a DataFrame
-            if hasattr(st.session_state.data, 'df_1') and isinstance(st.session_state.data.df_1, pd.DataFrame):
-                df1_to_display = st.session_state.data.df_1.copy() # Work on a copy
-                numeric_cols_df1 = df1_to_display.select_dtypes(include=np.number).columns
-                st.dataframe(df1_to_display)
-            else:
-                st.warning("General polygon information data (df_1) is not available or invalid.")
+        st.info("Click 'Update' to display the data for the last generated figure.")
+        
+        if st.button("Update", key="data_update_button"):
+            # Reverted logic: Content is now inside the button click
+            if 'data' in st.session_state and st.session_state.data is not None:
+                st.markdown("### General Polygon Information")
+                # Check if df_1 exists and is a DataFrame
+                if hasattr(st.session_state.data, 'df_1') and isinstance(st.session_state.data.df_1, pd.DataFrame):
+                    df1_to_display = st.session_state.data.df_1.copy() # Work on a copy
+                    numeric_cols_df1 = df1_to_display.select_dtypes(include=np.number).columns
+                    st.dataframe(df1_to_display)
+                else:
+                    st.warning("General polygon information data (df_1) is not available or invalid.")
 
-            st.markdown("### Polygon Vertex Coordinates")
-            # Check if df_2 exists and is a DataFrame
-            if hasattr(st.session_state.data, 'df_2') and isinstance(st.session_state.data.df_2, pd.DataFrame):
-                df2_to_display = st.session_state.data.df_2.copy() # Work on a copy
-                numeric_cols_df2 = df2_to_display.select_dtypes(include=np.number).columns
-                st.dataframe(df2_to_display)
+                st.markdown("### Polygon Vertex Coordinates")
+                # Check if df_2 exists and is a DataFrame
+                if hasattr(st.session_state.data, 'df_2') and isinstance(st.session_state.data.df_2, pd.DataFrame):
+                    df2_to_display = st.session_state.data.df_2.copy() # Work on a copy
+                    numeric_cols_df2 = df2_to_display.select_dtypes(include=np.number).columns
+                    st.dataframe(df2_to_display)
+                else:
+                    st.warning("Polygon vertex coordinate data (df_2) is not available or invalid.")
             else:
-                st.warning("Polygon vertex coordinate data (df_2) is not available or invalid.")
-        else:
-            st.info("Generate an image in the 'Generator' tab to see its data here.")
+                st.info("Generate an image in the 'Generator' tab to see its data here.")
 
     
     # Gallery Tab 
@@ -575,14 +627,25 @@ def main():
         if len(images_path) == 0:
             st.info("The gallery is empty.")
         else:
-            for i in range(0, len(images_path), 3): # rows
+            num_images = len(images_path)
+            num_rows = (num_images + 2) // 3 # Calculate rows needed
+            
+            for i in range(num_rows): # Iterate through rows
                 cols = st.columns(3)
-                for j in range(3): # 3 columns
-                    with cols[j]:
-                        try:
-                            st.image(images_path[i + j], width=200)
-                        except Exception:
-                            st.warning(f"Could not load image{i+j}.")
+                for j in range(3): # Iterate through columns
+                    img_index = i * 3 + j
+                    if img_index < num_images: # Check if image exists for this index
+                        with cols[j]:
+                            try:
+                                # Use width='stretch' for responsive images
+                                st.image(images_path[img_index], width="stretch") 
+                            except Exception:
+                                # Use img_index + 1 for 1-based naming
+                                st.warning(f"Could not load image{img_index + 1}.") 
+                    else:
+                        # Add empty space in the last row if needed
+                        with cols[j]:
+                            st.empty()
 
     # Bezier Playground tab
     with tabs[4]:
@@ -594,7 +657,14 @@ def main():
         show_controls = st.checkbox("Show Control Points", value=True)
 
         try:
-            data_bezier = Calculation(n=n_poly, ds=ds_bezier, bezier_iterations=iter_bezier)
+            # --- Optimization: Call cached function ---
+            data_bezier = get_calculation_data(
+                n=n_poly, 
+                ds=ds_bezier, 
+                reverse=False, 
+                bezier_iterations=iter_bezier
+            )
+            # --- End Optimization ---
             
             # Calculate plot limits 
             plot_lims = (-100, 100) 
@@ -737,7 +807,7 @@ def main():
 
         st.markdown("---")
         st.markdown("### Paper")
-        st.markdown("This short paper explains how the coordinates of the polygons were calculated for different offsets, and draws an interesting resemblance with the nautilus shell. It explores various spiral types and compares them to those generated with Bézier curves — which, interestingly, are quite close to logarithmic spirals with a growth coefficient near √φ ≈ 1.272.")
+        st.markdown("This short paper explains how the coordinates of the polygons were calculated for different offsets, and draws an interesting resemblance with the nautilus shell. It explores various spiral types and compares them to those generated with BéZier curves — which, interestingly, are quite close to logarithmic spirals with a growth coefficient near √φ ≈ 1.272.")
 
         st.markdown("---")
         st.markdown("### Settings")
@@ -793,3 +863,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
