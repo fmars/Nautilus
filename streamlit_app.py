@@ -9,7 +9,7 @@ from random import random, randint
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.collections import LineCollection, PatchCollection
 from io import BytesIO
-import base64 # To embed pdf
+# import base64 # Removed as no longer needed for PDF embedding
 from collections import deque
 # import zipfile # Removed zip functionality
 
@@ -89,31 +89,31 @@ class Plotter:
             colors2 = cmap(np.linspace(0.2, 1, num_bezier_pts)) if num_bezier_pts > 0 else []
 
         except Exception as e:
-             st.error(f"Error getting colormap '{color_map_name}': {e}")
-             # Come back to default colors if failed
-             default_cmap = plt.colormaps.get_cmap("jet")
-             colors = default_cmap(np.linspace(0.2, 1, num_polygons)) if num_polygons > 0 else []
-             colors2 = default_cmap(np.linspace(0.2, 1, num_bezier_pts)) if num_bezier_pts > 0 else []
+            st.error(f"Error getting colormap '{color_map_name}': {e}")
+            # Come back to default colors if failed
+            default_cmap = plt.colormaps.get_cmap("jet")
+            colors = default_cmap(np.linspace(0.2, 1, num_polygons)) if num_polygons > 0 else []
+            colors2 = default_cmap(np.linspace(0.2, 1, num_bezier_pts)) if num_bezier_pts > 0 else []
 
         
         try: # Apply the colormaps to the figures
             # Check if data object and necessary attributes exist before plotting
             if self.data:
-                 self.plot_polygon(colors)
-                 self.plot_circle_inscribed(colors)
-                 self.plot_circle_circumscribed(colors)
-                 self.plot_circle_inscribed_circumscribed(colors)
-                 self.plot_spiral()
-                 self.plot_graph(colors)
-                 self.plot_bezier(colors2)
-                 self.plot_circle(colors)
-                 self.plot_vertex(colors)
-                 self.plot_segment()
-                 self.plot_point()
+                self.plot_polygon(colors)
+                self.plot_circle_inscribed(colors)
+                self.plot_circle_circumscribed(colors)
+                self.plot_circle_inscribed_circumscribed(colors)
+                self.plot_spiral()
+                self.plot_graph(colors)
+                self.plot_bezier(colors2)
+                self.plot_circle(colors)
+                self.plot_vertex(colors)
+                self.plot_segment()
+                self.plot_point()
         except AttributeError as e:
-             st.error(f"Plotting error: Missing data - {e}. Check calculations.")
+            st.error(f"Plotting error: Missing data - {e}. Check calculations.")
         except Exception as e:
-             st.error(f"An unexpected error occurred during plotting: {e}")
+            st.error(f"An unexpected error occurred during plotting: {e}")
 
         return self.fig, self.data
 
@@ -152,7 +152,7 @@ class Plotter:
         self.line_thickness = C / (n_val**0.5) if n_val > 0 else C
 
 
-    def random_color_dict(self):    
+    def random_color_dict(self): 
         # For random colormap 2
         num_stops = randint(3, 12)
         positions = sorted([random() for _ in range(num_stops)])
@@ -193,70 +193,70 @@ class Plotter:
 
         if self.contour:
             for i in self.data.ns:
-                 if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
+                if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
                     self.ax.plot(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
-                                    color=self.couleur, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
+                                 color=self.couleur, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
         else:
             # Only draw lines if not filling AND not custom contour
             if not self.rempli_polygone:
                 for i, c in zip(self.data.ns, safe_colors):
-                     if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
+                    if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
                         self.ax.plot(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
-                                        color=c, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
+                                     color=c, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
         self.ax.autoscale_view()
 
     def plot_circle_inscribed(self, colors):
-         if not (self.show_ce_in and not self.show_ce_circon) or not hasattr(self.data, 'centres') or not hasattr(self.data, 'in_radii'): return
-         transp = 0.6 if self.rempli_polygone and self.show_polygone else 1
-         contour_colors = [self.couleur] * len(colors) if self.contour else colors
-         min_len = min(len(self.data.centres), len(self.data.in_radii), len(colors), len(contour_colors))
-         
-         # --- Optimization: Batch drawing ---
-         patches = []
-         for pt, in_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.in_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
-             if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(in_r, (int, float)) and in_r >= 0:
-                 c = plt.Circle((pt[0] * -1, pt[1] * -1), in_r, fill=self.rempli_ce_in, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
-                 patches.append(c)
-         self.ax.add_collection(PatchCollection(patches, match_original=True))
-         # --- End Optimization ---
-         self.ax.autoscale_view()
+        if not (self.show_ce_in and not self.show_ce_circon) or not hasattr(self.data, 'centres') or not hasattr(self.data, 'in_radii'): return
+        transp = 0.6 if self.rempli_polygone and self.show_polygone else 1
+        contour_colors = [self.couleur] * len(colors) if self.contour else colors
+        min_len = min(len(self.data.centres), len(self.data.in_radii), len(colors), len(contour_colors))
+        
+        # --- Optimization: Batch drawing ---
+        patches = []
+        for pt, in_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.in_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
+            if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(in_r, (int, float)) and in_r >= 0:
+                c = plt.Circle((pt[0] * -1, pt[1] * -1), in_r, fill=self.rempli_ce_in, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
+                patches.append(c)
+        self.ax.add_collection(PatchCollection(patches, match_original=True))
+        # --- End Optimization ---
+        self.ax.autoscale_view()
 
 
     def plot_circle_circumscribed(self, colors):
-         if not (self.show_ce_circon and not self.show_ce_in) or not hasattr(self.data, 'centres') or not hasattr(self.data, 'out_radii'): return
-         transp = 0.6 if self.rempli_polygone and self.show_polygone else 1
-         contour_colors = [self.couleur] * len(colors) if self.contour else colors
-         min_len = min(len(self.data.centres), len(self.data.out_radii), len(colors), len(contour_colors))
-         
-         # --- Optimization: Batch drawing ---
-         patches = []
-         for pt, out_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.out_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
-              if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(out_r, (int, float)) and out_r >= 0:
-                 c = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
-                 patches.append(c)
-         self.ax.add_collection(PatchCollection(patches, match_original=True))
-         # --- End Optimization ---
-         self.ax.autoscale_view()
+        if not (self.show_ce_circon and not self.show_ce_in) or not hasattr(self.data, 'centres') or not hasattr(self.data, 'out_radii'): return
+        transp = 0.6 if self.rempli_polygone and self.show_polygone else 1
+        contour_colors = [self.couleur] * len(colors) if self.contour else colors
+        min_len = min(len(self.data.centres), len(self.data.out_radii), len(colors), len(contour_colors))
+        
+        # --- Optimization: Batch drawing ---
+        patches = []
+        for pt, out_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.out_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
+            if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(out_r, (int, float)) and out_r >= 0:
+                c = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
+                patches.append(c)
+        self.ax.add_collection(PatchCollection(patches, match_original=True))
+        # --- End Optimization ---
+        self.ax.autoscale_view()
 
 
     def plot_circle_inscribed_circumscribed(self, colors):
-         if not (self.show_ce_circon and self.show_ce_in) or not hasattr(self.data, 'centres') or not hasattr(self.data, 'in_radii') or not hasattr(self.data, 'out_radii'): return
-         transp_inscrit, transp_circonscrit = (1, 0.6) if self.rempli_ce_in and self.rempli_ce_circon else (1, 1)
-         if self.rempli_polygone and self.show_polygone:
-             transp_inscrit = transp_circonscrit = 0.6
-         contour_colors = [self.couleur] * len(colors) if self.contour else colors
-         min_len = min(len(self.data.centres), len(self.data.in_radii), len(self.data.out_radii), len(colors), len(contour_colors))
-         
-         # --- Optimization: Batch drawing ---
-         patches = []
-         for pt, in_r, out_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.in_radii[:min_len], self.data.out_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
-             if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(in_r, (int, float)) and in_r >= 0 and isinstance(out_r, (int, float)) and out_r >= 0:
-                 c_in = plt.Circle((pt[0] * -1, pt[1] * -1), in_r, fill=self.rempli_ce_in, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp_inscrit, zorder=self.data.n - i)
-                 c_out = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp_circonscrit, zorder=self.data.n - i - 1)
-                 patches.extend([c_in, c_out]) # Add both circles
-         self.ax.add_collection(PatchCollection(patches, match_original=True))
-         # --- End Optimization ---
-         self.ax.autoscale_view()
+        if not (self.show_ce_circon and self.show_ce_in) or not hasattr(self.data, 'centres') or not hasattr(self.data, 'in_radii') or not hasattr(self.data, 'out_radii'): return
+        transp_inscrit, transp_circonscrit = (1, 0.6) if self.rempli_ce_in and self.rempli_ce_circon else (1, 1)
+        if self.rempli_polygone and self.show_polygone:
+            transp_inscrit = transp_circonscrit = 0.6
+        contour_colors = [self.couleur] * len(colors) if self.contour else colors
+        min_len = min(len(self.data.centres), len(self.data.in_radii), len(self.data.out_radii), len(colors), len(contour_colors))
+        
+        # --- Optimization: Batch drawing ---
+        patches = []
+        for pt, in_r, out_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.in_radii[:min_len], self.data.out_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
+            if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(in_r, (int, float)) and in_r >= 0 and isinstance(out_r, (int, float)) and out_r >= 0:
+                c_in = plt.Circle((pt[0] * -1, pt[1] * -1), in_r, fill=self.rempli_ce_in, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp_inscrit, zorder=self.data.n - i)
+                c_out = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp_circonscrit, zorder=self.data.n - i - 1)
+                patches.extend([c_in, c_out]) # Add both circles
+        self.ax.add_collection(PatchCollection(patches, match_original=True))
+        # --- End Optimization ---
+        self.ax.autoscale_view()
 
 
     def plot_spiral(self):
@@ -269,162 +269,162 @@ class Plotter:
         self.ax.autoscale_view()
 
     def plot_bezier(self, colors2):
-         if not self.show_curve or not hasattr(self.data, 'bezier_pts') or not self.data.bezier_pts: return
-         if len(self.data.bezier_pts) < 2: return
-         
-         # Ensure colors2 has enough elements or handle mismatch
-         num_segments = len(self.data.bezier_pts) - 1
-         safe_colors2 = colors2[:num_segments] if len(colors2) >= num_segments else ([colors2[0]] * num_segments if colors2 else ['blue'] * num_segments) # Fallback color
-         
-         line_colors = [self.couleur] * num_segments if self.contour else safe_colors2
-         
-         segments = []
-         for i in range(num_segments):
-             # Check if points are valid tuples/lists of len 2
-             p1 = self.data.bezier_pts[i]
-             p2 = self.data.bezier_pts[i+1]
-             if (isinstance(p1, (tuple, list)) and len(p1) == 2 and
-                 isinstance(p2, (tuple, list)) and len(p2) == 2):
-                 segments.append([(p1[0], p1[1]), (p2[0], p2[1])])
-             else:
-                  # Skip invalid segment? Log warning?
-                  print(f"Warning: Invalid points for Bezier segment at index {i}")
-                  return # Stop plotting Bezier if data is bad
+        if not self.show_curve or not hasattr(self.data, 'bezier_pts') or not self.data.bezier_pts: return
+        if len(self.data.bezier_pts) < 2: return
+        
+        # Ensure colors2 has enough elements or handle mismatch
+        num_segments = len(self.data.bezier_pts) - 1
+        safe_colors2 = colors2[:num_segments] if len(colors2) >= num_segments else ([colors2[0]] * num_segments if colors2 else ['blue'] * num_segments) # Fallback color
+        
+        line_colors = [self.couleur] * num_segments if self.contour else safe_colors2
+        
+        segments = []
+        for i in range(num_segments):
+            # Check if points are valid tuples/lists of len 2
+            p1 = self.data.bezier_pts[i]
+            p2 = self.data.bezier_pts[i+1]
+            if (isinstance(p1, (tuple, list)) and len(p1) == 2 and
+                isinstance(p2, (tuple, list)) and len(p2) == 2):
+                segments.append([(p1[0], p1[1]), (p2[0], p2[1])])
+            else:
+                # Skip invalid segment? Log warning?
+                print(f"Warning: Invalid points for Bezier segment at index {i}")
+                return # Stop plotting Bezier if data is bad
 
-         if segments: # Only add collection if valid segments exist
-             lc = LineCollection(segments, colors=line_colors, linewidths=self.line_thickness * 1.5, zorder=self.data.n + 1)
-             self.ax.add_collection(lc)
-             self.ax.autoscale_view()
+        if segments: # Only add collection if valid segments exist
+            lc = LineCollection(segments, colors=line_colors, linewidths=self.line_thickness * 1.5, zorder=self.data.n + 1)
+            self.ax.add_collection(lc)
+            self.ax.autoscale_view()
 
 
     def plot_circle(self, colors):
-         if not self.show_cercle or not hasattr(self.data, 'ns') or not hasattr(self.data, 'a') or not hasattr(self.data, 'df_2'): return
-         patches, edge_colors = [], []
-         base_colors = [self.couleur] * len(colors) if self.contour else colors
-         min_len = min(len(self.data.ns), len(base_colors))
-         radius = self.data.a / 2 if self.data.a > 0 else 0.1 # Ensure positive radius
+        if not self.show_cercle or not hasattr(self.data, 'ns') or not hasattr(self.data, 'a') or not hasattr(self.data, 'df_2'): return
+        patches, edge_colors = [], []
+        base_colors = [self.couleur] * len(colors) if self.contour else colors
+        min_len = min(len(self.data.ns), len(base_colors))
+        radius = self.data.a / 2 if self.data.a > 0 else 0.1 # Ensure positive radius
 
-         for i, col in zip(self.data.ns[:min_len], base_colors[:min_len]):
-             if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
-                 xvals = self.data.df_2[f"{i}-gon X"].dropna() # Use dropna
-                 yvals = self.data.df_2[f"{i}-gon Y"].dropna() # Use dropna
-                 for ptsx, ptsy in zip(xvals, yvals):
-                      # Check if ptsx, ptsy are numbers before creating Circle
-                     if isinstance(ptsx, (int, float)) and isinstance(ptsy, (int, float)):
-                         patches.append(plt.Circle((ptsx, ptsy), radius))
-                         edge_colors.append(col)
-         if patches: 
-             pc = PatchCollection(patches, facecolor="none", edgecolor=edge_colors, linewidth=self.line_thickness, zorder=self.data.n + 1)
-             self.ax.add_collection(pc)
-             self.ax.autoscale_view()
+        for i, col in zip(self.data.ns[:min_len], base_colors[:min_len]):
+            if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
+                xvals = self.data.df_2[f"{i}-gon X"].dropna() # Use dropna
+                yvals = self.data.df_2[f"{i}-gon Y"].dropna() # Use dropna
+                for ptsx, ptsy in zip(xvals, yvals):
+                    # Check if ptsx, ptsy are numbers before creating Circle
+                    if isinstance(ptsx, (int, float)) and isinstance(ptsy, (int, float)):
+                        patches.append(plt.Circle((ptsx, ptsy), radius))
+                        edge_colors.append(col)
+        if patches: 
+            pc = PatchCollection(patches, facecolor="none", edgecolor=edge_colors, linewidth=self.line_thickness, zorder=self.data.n + 1)
+            self.ax.add_collection(pc)
+            self.ax.autoscale_view()
 
 
     def plot_vertex(self, colors):
-         if not self.show_vertex or not hasattr(self.data, 'ns') or not hasattr(self.data, 'centres') or not hasattr(self.data, 'df_2'): return
-         line_colors = [self.couleur] * len(colors) if self.contour else colors
-         line_segments, seg_colors = [], []
-         min_len = min(len(self.data.ns), len(line_colors), len(self.data.centres))
-         n_val = getattr(self.data, 'n', 1) # Get n for alpha calculation, default 1
-         alpha_val = min(1, 1 / (n_val ** 0.5)) if n_val > 0 else 1
+        if not self.show_vertex or not hasattr(self.data, 'ns') or not hasattr(self.data, 'centres') or not hasattr(self.data, 'df_2'): return
+        line_colors = [self.couleur] * len(colors) if self.contour else colors
+        line_segments, seg_colors = [], []
+        min_len = min(len(self.data.ns), len(line_colors), len(self.data.centres))
+        n_val = getattr(self.data, 'n', 1) # Get n for alpha calculation, default 1
+        alpha_val = min(1, 1 / (n_val ** 0.5)) if n_val > 0 else 1
 
-         for i, col in zip(self.data.ns[:min_len], line_colors[:min_len]):
-             center_idx = i - 3
-             if 0 <= center_idx < len(self.data.centres): # Check index validity
-                 pt_center = self.data.centres[center_idx]
-                 if isinstance(pt_center, (list, tuple)) and len(pt_center) == 2:
-                     x_center, y_center = pt_center[0] * -1, pt_center[1] * -1
-                     if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
-                         xvals = self.data.df_2[f"{i}-gon X"].dropna()
-                         yvals = self.data.df_2[f"{i}-gon Y"].dropna()
-                         for ptsx, ptsy in zip(xvals, yvals):
-                             if isinstance(ptsx, (int, float)) and isinstance(ptsy, (int, float)):
-                                 line_segments.append([(x_center, y_center), (ptsx, ptsy)])
-                                 seg_colors.append(col)
-         if line_segments: 
-             lc = LineCollection(line_segments, colors=seg_colors, linewidths=self.line_thickness, alpha=alpha_val, zorder=self.data.n + 1)
-             self.ax.add_collection(lc)
-             self.ax.autoscale_view()
+        for i, col in zip(self.data.ns[:min_len], line_colors[:min_len]):
+            center_idx = i - 3
+            if 0 <= center_idx < len(self.data.centres): # Check index validity
+                pt_center = self.data.centres[center_idx]
+                if isinstance(pt_center, (list, tuple)) and len(pt_center) == 2:
+                    x_center, y_center = pt_center[0] * -1, pt_center[1] * -1
+                    if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
+                        xvals = self.data.df_2[f"{i}-gon X"].dropna()
+                        yvals = self.data.df_2[f"{i}-gon Y"].dropna()
+                        for ptsx, ptsy in zip(xvals, yvals):
+                            if isinstance(ptsx, (int, float)) and isinstance(ptsy, (int, float)):
+                                line_segments.append([(x_center, y_center), (ptsx, ptsy)])
+                                seg_colors.append(col)
+        if line_segments: 
+            lc = LineCollection(line_segments, colors=seg_colors, linewidths=self.line_thickness, alpha=alpha_val, zorder=self.data.n + 1)
+            self.ax.add_collection(lc)
+            self.ax.autoscale_view()
 
 
     def plot_graph(self, colors):
-         if not (self.show_graphe and hasattr(self.data, 'ds') and self.data.ds != 0): return
-         if not hasattr(self.data, 'ns') or not hasattr(self.data, 'df_2') or not hasattr(self.data, 'spiral_x') or not self.data.spiral_x: return
+        if not (self.show_graphe and hasattr(self.data, 'ds') and self.data.ds != 0): return
+        if not hasattr(self.data, 'ns') or not hasattr(self.data, 'df_2') or not hasattr(self.data, 'spiral_x') or not self.data.spiral_x: return
 
-         line_colors = [self.couleur] * len(colors) if self.contour else colors
-         line_segments, seg_colors = [], []
-         min_len = min(len(self.data.ns), len(line_colors))
-         n_val = getattr(self.data, 'n', 1)
-         alpha_val = min(1, 1 / (n_val ** 0.5)) if n_val > 0 else 1
+        line_colors = [self.couleur] * len(colors) if self.contour else colors
+        line_segments, seg_colors = [], []
+        min_len = min(len(self.data.ns), len(line_colors))
+        n_val = getattr(self.data, 'n', 1)
+        alpha_val = min(1, 1 / (n_val ** 0.5)) if n_val > 0 else 1
 
-         for i, col, ind in zip(self.data.ns[:min_len], line_colors[:min_len], range(min_len)):
-             if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
-                 xvals = self.data.df_2[f"{i}-gon X"].dropna()
-                 yvals = self.data.df_2[f"{i}-gon Y"].dropna()
-                 for ptsx, ptsy in zip(xvals, yvals):
-                     spiral_index = ind * self.data.ds
-                     if isinstance(ptsx, (int, float)) and isinstance(ptsy, (int, float)) and spiral_index < len(self.data.spiral_x):
-                         spiral_pt_x = self.data.spiral_x[spiral_index]
-                         spiral_pt_y = self.data.spiral_y[spiral_index]
-                         # Ensure spiral points are also valid numbers
-                         if isinstance(spiral_pt_x, (int, float)) and isinstance(spiral_pt_y, (int, float)):
-                             line_segments.append([(spiral_pt_x, spiral_pt_y), (ptsx, ptsy)])
-                             seg_colors.append(col)
-         if line_segments:
-             lc = LineCollection(line_segments, colors=seg_colors, linewidths=self.line_thickness, alpha=alpha_val, zorder=self.data.n + 1)
-             self.ax.add_collection(lc)
-             self.ax.autoscale_view()
+        for i, col, ind in zip(self.data.ns[:min_len], line_colors[:min_len], range(min_len)):
+            if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
+                xvals = self.data.df_2[f"{i}-gon X"].dropna()
+                yvals = self.data.df_2[f"{i}-gon Y"].dropna()
+                for ptsx, ptsy in zip(xvals, yvals):
+                    spiral_index = ind * self.data.ds
+                    if isinstance(ptsx, (int, float)) and isinstance(ptsy, (int, float)) and spiral_index < len(self.data.spiral_x):
+                        spiral_pt_x = self.data.spiral_x[spiral_index]
+                        spiral_pt_y = self.data.spiral_y[spiral_index]
+                        # Ensure spiral points are also valid numbers
+                        if isinstance(spiral_pt_x, (int, float)) and isinstance(spiral_pt_y, (int, float)):
+                            line_segments.append([(spiral_pt_x, spiral_pt_y), (ptsx, ptsy)])
+                            seg_colors.append(col)
+        if line_segments:
+            lc = LineCollection(line_segments, colors=seg_colors, linewidths=self.line_thickness, alpha=alpha_val, zorder=self.data.n + 1)
+            self.ax.add_collection(lc)
+            self.ax.autoscale_view()
 
 
     def plot_segment(self):
-         if not self.show_segment: return
-         if not hasattr(self.data, 'ds') or self.data.ds <= 0 or not hasattr(self.data, 'spiral_x') or len(self.data.spiral_x) < 2: return 
-         
-         to_check = [self.show_polygone, self.show_ce_in, self.show_ce_circon, self.show_curve,
-                     self.show_cercle, self.show_vertex, self.show_spirale, self.show_graphe, self.show_point]
-         line_color = self.couleur if self.contour and not any(to_check) else "red"
-         
-         nb = len(self.data.spiral_x)
-         segments = []
-         count = 0
-         while count + 1 < nb: # Iterate up to the second to last point
-             # Use current point and next point directly
-             p1_x, p1_y = self.data.spiral_x[count], self.data.spiral_y[count]
-             p2_x, p2_y = self.data.spiral_x[count+1], self.data.spiral_y[count+1]
-             
-             # Check if points are valid numbers
-             if (isinstance(p1_x, (int, float)) and isinstance(p1_y, (int, float)) and
-                 isinstance(p2_x, (int, float)) and isinstance(p2_y, (int, float))):
-                  # Add segment every 'ds' steps
-                 if count % self.data.ds == 0:
-                      segments.append([(p1_x, p1_y), (p2_x, p2_y)])
-             count += 1 # Increment count by 1 in each loop iteration
+        if not self.show_segment: return
+        if not hasattr(self.data, 'ds') or self.data.ds <= 0 or not hasattr(self.data, 'spiral_x') or len(self.data.spiral_x) < 2: return 
+        
+        to_check = [self.show_polygone, self.show_ce_in, self.show_ce_circon, self.show_curve,
+                    self.show_cercle, self.show_vertex, self.show_spirale, self.show_graphe, self.show_point]
+        line_color = self.couleur if self.contour and not any(to_check) else "red"
+        
+        nb = len(self.data.spiral_x)
+        segments = []
+        count = 0
+        while count + 1 < nb: # Iterate up to the second to last point
+            # Use current point and next point directly
+            p1_x, p1_y = self.data.spiral_x[count], self.data.spiral_y[count]
+            p2_x, p2_y = self.data.spiral_x[count+1], self.data.spiral_y[count+1]
+            
+            # Check if points are valid numbers
+            if (isinstance(p1_x, (int, float)) and isinstance(p1_y, (int, float)) and
+                isinstance(p2_x, (int, float)) and isinstance(p2_y, (int, float))):
+                # Add segment every 'ds' steps
+                if count % self.data.ds == 0:
+                    segments.append([(p1_x, p1_y), (p2_x, p2_y)])
+            count += 1 # Increment count by 1 in each loop iteration
 
-         if segments:
-             lc = LineCollection(segments, colors=line_color, linewidth=self.line_thickness, linestyle="-", zorder=self.data.n + 2 if hasattr(self.data, 'n') else 2)
-             self.ax.add_collection(lc)
-             self.ax.autoscale_view()
+        if segments:
+            lc = LineCollection(segments, colors=line_color, linewidth=self.line_thickness, linestyle="-", zorder=self.data.n + 2 if hasattr(self.data, 'n') else 2)
+            self.ax.add_collection(lc)
+            self.ax.autoscale_view()
 
 
     def plot_point(self):
-         if not self.show_point: return
-         if not hasattr(self.data, 'spiral_x') or not hasattr(self.data, 'spiral_y') or not self.data.spiral_x or not self.data.spiral_y: return 
-         
-         # Filter out potential None or non-numeric values
-         valid_x = [x for x in self.data.spiral_x if isinstance(x, (int, float))]
-         valid_y = [y for y in self.data.spiral_y if isinstance(y, (int, float))]
-         
-         # Ensure x and y have the same length after filtering
-         min_len = min(len(valid_x), len(valid_y))
-         valid_x = valid_x[:min_len]
-         valid_y = valid_y[:min_len]
+        if not self.show_point: return
+        if not hasattr(self.data, 'spiral_x') or not hasattr(self.data, 'spiral_y') or not self.data.spiral_x or not self.data.spiral_y: return 
+        
+        # Filter out potential None or non-numeric values
+        valid_x = [x for x in self.data.spiral_x if isinstance(x, (int, float))]
+        valid_y = [y for y in self.data.spiral_y if isinstance(y, (int, float))]
+        
+        # Ensure x and y have the same length after filtering
+        min_len = min(len(valid_x), len(valid_y))
+        valid_x = valid_x[:min_len]
+        valid_y = valid_y[:min_len]
 
-         if not valid_x: return # No valid points to plot
-         
-         n_val = getattr(self.data, 'n', 1)
-         point_size = max(10, 100 / (n_val**0.5)) if n_val > 0 else 100
-         
-         self.ax.scatter(valid_x, valid_y, s=point_size, c="red", marker=".", zorder=self.data.n + 2 if hasattr(self.data, 'n') else 2)
-         self.ax.autoscale_view()
+        if not valid_x: return # No valid points to plot
+        
+        n_val = getattr(self.data, 'n', 1)
+        point_size = max(10, 100 / (n_val**0.5)) if n_val > 0 else 100
+        
+        self.ax.scatter(valid_x, valid_y, s=point_size, c="red", marker=".", zorder=self.data.n + 2 if hasattr(self.data, 'n') else 2)
+        self.ax.autoscale_view()
 
 
 
@@ -432,7 +432,7 @@ class Plotter:
 def main():
     st.set_page_config(
         page_title="Nautilus",
-        page_icon="./gallery/icon.png",     
+        page_icon="./gallery/icon.png", 
         initial_sidebar_state="expanded"
     )
 
@@ -450,7 +450,7 @@ def main():
 
     st.markdown("""
         <style>
-               .block-container {
+                .block-container {
                     padding-top: 2rem;
                 }
         </style>
@@ -619,7 +619,7 @@ def main():
             else:
                 st.info("Generate an image in the 'Generator' tab to see its data here.")
 
-    
+        
     # Gallery Tab 
     with tabs[3]: 
         images_path = [f"./gallery/image{i}.jpg" for i in range(1, 22)]
@@ -749,18 +749,39 @@ def main():
     # Paper Tab
     with tabs[5]: 
         try:
-            with open("paper.pdf", "rb") as f:
-                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800px" type="application/pdf" style="border: none;"></iframe>'
-            st.markdown(pdf_display, unsafe_allow_html=True)
+            # Add download button for the PDF
+            with open("paper.pdf", "rb") as pdf_file:
+                PDFbyte = pdf_file.read()
+
+            st.download_button(
+                label="Download Paper (PDF)",
+                data=PDFbyte,
+                file_name="paper.pdf",
+                mime="application/pdf"
+            )
         except FileNotFoundError:
-            st.warning("`nautilus-polygon.pdf` not found.")
+            st.warning("`paper.pdf` not found. Download button is unavailable.")
         except Exception as e:
-            st.error(f"Error loading PDF: {e}")
+            st.error(f"Error reading PDF for download: {e}")
+
+        st.markdown("---") # Add a separator
+
+        # Display 6 JPGs
+        st.markdown("### Paper Preview")
+        
+        num_pages = 6
+        for i in range(1, num_pages + 1):
+            # Assume paper images are in the gallery folder
+            image_path = f"./gallery/paper-{i}.jpg" 
+            try:
+                st.image(image_path, use_column_width='always')
+            except Exception: 
+                # Catch FileNotFoundError or other image loading errors
+                st.warning(f"Could not load page {i} ({image_path}).")
 
 
     # Help Tab
-    with tabs[6]:  # Help
+    with tabs[6]: # Help
         st.markdown("### Generator")
         st.markdown("This section displays the figures generated using the parameters set in the sidebar.")
 
@@ -825,7 +846,7 @@ def main():
         )
 
         # center the image
-        col1, col2, col3 = st.columns([1, 2, 1])  
+        col1, col2, col3 = st.columns([1, 2, 1]) 
         with col2:
             st.image(
                 "./gallery/maxbill.jpg",
