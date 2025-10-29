@@ -194,15 +194,15 @@ class Plotter:
         if self.contour:
             for i in self.data.ns:
                  if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
-                    self.ax.plot(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
-                                    color=self.couleur, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
+                     self.ax.plot(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
+                                   color=self.couleur, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
         else:
             # Only draw lines if not filling AND not custom contour
             if not self.rempli_polygone:
                 for i, c in zip(self.data.ns, safe_colors):
                      if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
-                        self.ax.plot(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
-                                        color=c, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
+                         self.ax.plot(self.data.df_2[f"{i}-gon X"].dropna(), self.data.df_2[f"{i}-gon Y"].dropna(),
+                                       color=c, lw=self.line_thickness, alpha=1, zorder=self.data.n-i) # dropna added
         self.ax.autoscale_view()
 
     def plot_circle_inscribed(self, colors):
@@ -232,8 +232,8 @@ class Plotter:
          patches = []
          for pt, out_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.out_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
               if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(out_r, (int, float)) and out_r >= 0:
-                 c = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
-                 patches.append(c)
+                  c = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
+                  patches.append(c)
          self.ax.add_collection(PatchCollection(patches, match_original=True))
          # --- End Optimization ---
          self.ax.autoscale_view()
@@ -432,7 +432,7 @@ class Plotter:
 def main():
     st.set_page_config(
         page_title="Nautilus",
-        page_icon="./gallery/icon.png",     
+        page_icon="./gallery/icon.png",    
         initial_sidebar_state="expanded"
     )
 
@@ -450,7 +450,7 @@ def main():
 
     st.markdown("""
         <style>
-               .block-container {
+                .block-container {
                     padding-top: 2rem;
                 }
         </style>
@@ -702,7 +702,7 @@ def main():
             if show_controls and hasattr(data_bezier, 'pts') and data_bezier.pts:
                 # Filter valid point before processing
                 valid_pts = [p for p in data_bezier.pts if isinstance(p, (tuple, list)) and len(p) == 3 and 
-                                    all(isinstance(pt, (tuple, list)) and len(pt)==2 for pt in p)]
+                                     all(isinstance(pt, (tuple, list)) and len(pt)==2 for pt in p)]
                 if valid_pts:
                     p1s_x = [p[1][0] for p in valid_pts]
                     p1s_y = [p[1][1] for p in valid_pts]
@@ -746,21 +746,49 @@ def main():
             st.error(f"Error in Bezier Playground: {e}")
 
 
-    # Paper Tab
+    # Paper Ta
     with tabs[5]: 
+        # --- MODIFICATION: Define paths for the two PDF versions ---
+        low_quality_pdf_path = "paper_low_quality.pdf"
+        high_quality_pdf_path = "paper_high_quality.pdf"
+
+        # --- 1. Add Download Button for High-Quality PDF ---
         try:
-            with open("paper.pdf", "rb") as f:
-                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+            # Read the high-quality PDF file in binary mode
+            with open(high_quality_pdf_path, "rb") as f_hq:
+                pdf_data_hq = f_hq.read()
+            
+            st.download_button(
+                label="Download High-Quality Paper (PDF)",
+                data=pdf_data_hq,
+                file_name="nautilus-paper.pdf", # This is the name the user's browser will suggest
+                mime="application/pdf"
+            )
+        except FileNotFoundError:
+            st.warning(f"High-quality paper (`{high_quality_pdf_path}`) not found. Download button is unavailable.")
+        except Exception as e:
+            st.error(f"Error preparing high-quality PDF for download: {e}")
+        
+        st.markdown("---") # Add a separator
+
+        # --- 2. Display Low-Quality PDF (as before) ---
+        try:
+            with open(low_quality_pdf_path, "rb") as f_lq:
+                base64_pdf = base64.b64encode(f_lq.read()).decode('utf-8')
+            
+            # Embed the PDF in an iframe
             pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800px" type="application/pdf" style="border: none;"></iframe>'
             st.markdown(pdf_display, unsafe_allow_html=True)
+        
         except FileNotFoundError:
-            st.warning("`nautilus-polygon.pdf` not found.")
+            st.warning(f"Low-quality paper preview (`{low_quality_pdf_path}`) not found.")
         except Exception as e:
-            st.error(f"Error loading PDF: {e}")
+            st.error(f"Error loading low-quality PDF preview: {e}")
+        # --- END MODIFICATION ---
 
 
     # Help Tab
-    with tabs[6]:  # Help
+    with tabs[6]: # Help
         st.markdown("### Generator")
         st.markdown("This section displays the figures generated using the parameters set in the sidebar.")
 
@@ -829,7 +857,7 @@ def main():
         with col2:
             st.image(
                 "./gallery/maxbill.jpg",
-                caption="Max Bill: *Fifteen Variations on a Single Theme* (1938). Photo by TenerifeTenerife, licensed under CC.",
+                caption="Max Bill: *Fifteen Variations on a Single Theme* (1938). Photo by Tenerife, licensed under CC.",
                 width="stretch"
             )
         st.markdown(
@@ -863,4 +891,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
