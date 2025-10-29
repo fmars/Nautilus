@@ -9,14 +9,12 @@ from random import random, randint
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.collections import LineCollection, PatchCollection
 from io import BytesIO
-# import base64 # Removed as no longer needed for PDF embedding
 from collections import deque
-# import zipfile # Removed zip functionality
+
 
 from calculation import Calculation
 
 
-# Removed create_zip_of_figures function
 
 @st.cache_data
 def get_calculation_data(n, ds, reverse, bezier_iterations=4):
