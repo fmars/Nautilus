@@ -771,8 +771,8 @@ def main():
         
         num_pages = 6
         for i in range(1, num_pages + 1):
-            # Assume paper images are in the gallery folder
-            image_path = f"./gallery/paper-{i}.jpg" 
+            # Assume paper images are in the paper folder
+            image_path = f"./paper/paper-{i}.jpg" 
             try:
                 st.image(image_path, use_column_width='always')
             except Exception: 
