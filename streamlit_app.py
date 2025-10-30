@@ -170,7 +170,6 @@ class Plotter:
         safe_colors = colors[:len(self.data.ns)] if hasattr(self.data, 'ns') else []
         
         if self.rempli_polygone:
-            # --- Optimization: Batch drawing ---
             patches_by_zorder = {}
             for i, c in zip(self.data.ns, safe_colors):
                 if f"{i}-gon X" in self.data.df_2 and f"{i}-gon Y" in self.data.df_2:
@@ -187,7 +186,6 @@ class Plotter:
                 data = patches_by_zorder[z]
                 pc = PatchCollection([plt.Polygon(p) for p in data['polys']], facecolors=data['colors'], alpha=1, zorder=z)
                 self.ax.add_collection(pc)
-            # --- End Optimization ---
 
         if self.contour:
             for i in self.data.ns:
@@ -209,14 +207,12 @@ class Plotter:
         contour_colors = [self.couleur] * len(colors) if self.contour else colors
         min_len = min(len(self.data.centres), len(self.data.in_radii), len(colors), len(contour_colors))
         
-        # --- Optimization: Batch drawing ---
         patches = []
         for pt, in_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.in_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
             if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(in_r, (int, float)) and in_r >= 0:
                 c = plt.Circle((pt[0] * -1, pt[1] * -1), in_r, fill=self.rempli_ce_in, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
                 patches.append(c)
         self.ax.add_collection(PatchCollection(patches, match_original=True))
-        # --- End Optimization ---
         self.ax.autoscale_view()
 
 
@@ -226,14 +222,12 @@ class Plotter:
         contour_colors = [self.couleur] * len(colors) if self.contour else colors
         min_len = min(len(self.data.centres), len(self.data.out_radii), len(colors), len(contour_colors))
         
-        # --- Optimization: Batch drawing ---
         patches = []
         for pt, out_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.out_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
             if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(out_r, (int, float)) and out_r >= 0:
                 c = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp, zorder=self.data.n - i)
                 patches.append(c)
         self.ax.add_collection(PatchCollection(patches, match_original=True))
-        # --- End Optimization ---
         self.ax.autoscale_view()
 
 
@@ -245,7 +239,6 @@ class Plotter:
         contour_colors = [self.couleur] * len(colors) if self.contour else colors
         min_len = min(len(self.data.centres), len(self.data.in_radii), len(self.data.out_radii), len(colors), len(contour_colors))
         
-        # --- Optimization: Batch drawing ---
         patches = []
         for pt, in_r, out_r, col, edge_col, i in zip(self.data.centres[:min_len], self.data.in_radii[:min_len], self.data.out_radii[:min_len], colors[:min_len], contour_colors[:min_len], range(min_len)):
             if isinstance(pt, (list, tuple)) and len(pt) == 2 and isinstance(in_r, (int, float)) and in_r >= 0 and isinstance(out_r, (int, float)) and out_r >= 0:
@@ -253,7 +246,6 @@ class Plotter:
                 c_out = plt.Circle((pt[0] * -1, pt[1] * -1), out_r, fill=self.rempli_ce_circon, lw=self.line_thickness, edgecolor=edge_col, facecolor=col, alpha=transp_circonscrit, zorder=self.data.n - i - 1)
                 patches.extend([c_in, c_out]) # Add both circles
         self.ax.add_collection(PatchCollection(patches, match_original=True))
-        # --- End Optimization ---
         self.ax.autoscale_view()
 
 
@@ -513,13 +505,11 @@ def main():
             }
             with st.spinner('Generating your masterpiece...'):
                 try:
-                    # --- Optimization: Call cached function ---
                     data = get_calculation_data(
                         n=info_dict["n"], 
                         ds=info_dict["ds"], 
                         reverse=info_dict["reverse"]
                     )
-                    # --- End Optimization ---
                     
                     # Pass data to plotter
                     plotter_instance = Plotter(info_dict, data)
@@ -531,13 +521,11 @@ def main():
                         st.session_state.data = data # Store data only if fig is valid
                         st.session_state.n_sides = n_sides
                         st.session_state.ds_offset = ds_offset
-                        # --- MODIFICATION: Add figure to history ---
                         # Use fig.copy() if available, otherwise just append fig
                         try:
                             st.session_state.figure_history.appendleft(fig.copy()) # Add newest to the left
                         except AttributeError: # Older matplotlib might not have copy
                             st.session_state.figure_history.appendleft(fig)
-                        # --- END MODIFICATION ---
 
                     else:
                         st.error("Failed to generate figure.")
@@ -644,14 +632,12 @@ def main():
         show_controls = st.checkbox("Show Control Points", value=True)
 
         try:
-            # --- Optimization: Call cached function ---
             data_bezier = get_calculation_data(
                 n=n_poly, 
                 ds=ds_bezier, 
                 reverse=False, 
                 bezier_iterations=iter_bezier
             )
-            # --- End Optimization ---
             
             # Calculate plot limits 
             plot_lims = (-100, 100) 
