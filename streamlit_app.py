@@ -422,7 +422,7 @@ class Plotter:
 def main():
     st.set_page_config(
         page_title="Nautilus",
-        page_icon="./gallery/icon.png", 
+        page_icon="./images/icon/icon.png", 
         initial_sidebar_state="expanded"
     )
 
@@ -596,7 +596,7 @@ def main():
         
     # Gallery Tab 
     with tabs[3]: 
-        images_path = [f"./gallery/image{i}.jpg" for i in range(1, 22)]
+        images_path = [f"./images/gallery/image{i}.jpg" for i in range(1, 22)]
 
         if len(images_path) == 0:
             st.info("The gallery is empty.")
@@ -820,7 +820,7 @@ def main():
         col1, col2, col3 = st.columns([1, 2, 1]) 
         with col2:
             st.image(
-                "./gallery/maxbill.jpg",
+                "./images/acknowledgements/maxbill.jpg",
                 caption="Max Bill: *Fifteen Variations on a Single Theme* (1938). Photo by TenerifeTenerife, licensed under CC.",
                 width="stretch"
             )
