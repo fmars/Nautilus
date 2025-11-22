@@ -12,6 +12,8 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection, PatchCollection
 from matplotlib.colors import LinearSegmentedColormap
+from io import BytesIO
+from collections import deque
 
 from calculation import Calculation
 
