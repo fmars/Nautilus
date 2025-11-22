@@ -11,7 +11,6 @@ from matplotlib.collections import LineCollection, PatchCollection
 from io import BytesIO
 from collections import deque
 
-
 from calculation import Calculation
 
 
