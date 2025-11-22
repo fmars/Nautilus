@@ -1,80 +1,61 @@
-# Nautilus Art Generator
+# Nautilus – Generative Polygon Art
 
-Nautilus is an interactive web application for creating generative art based on the mathematical principles of nested polygons. Built with Python and Streamlit, it provides a user-friendly interface that doesn't require knowledge in coding.
+Nautilus is an interactive Streamlit app for exploring nested polygons, spirals, and Bézier curves. Adjust a few controls and the app produces colorful geometric art while exposing the underlying math.
 
-## Features
+## Highlights
+- Interactive generator with controls for polygon count, spiral offset, fill/outline visibility, and dark/light mode
+- Multiple color themes plus two random palettes for happy accidents
+- Optional overlays: polygon spiral, inscribed/circumscribed circles, Bézier curve, vertices, and more
+- History that keeps your last 21 renders in-session for quick comparison
+- Data tab with the exact coordinates and derived values powering each render
+- Gallery of curated examples and a built-in viewer for the accompanying paper
 
-* **Interactive Art Generation**: Create unique geometric art by adjusting parameters in a simple sidebar.
-* **Customizable Parameters**: Control the number of polygons (`n`), the spiral offset (`ds`), color themes, rotation direction, and more.
-* **Multiple Display Elements**: Choose to display various components of the figure, including polygons, inscribed/circumscribed circles, the main polygon spiral, and the resulting Bézier curve.
-* **Dedicated Playgrounds**:
-    * **Bézier Playground**: Isolate and experiment with the Bézier curve generated from the polygon spiral's control points.
-* **Data Viewer**: Inspect the raw numerical data, including vertex coordinates and geometric properties, for each generated figure.
-* **Generation History**: The app automatically saves your last 21 creations in a session, allowing you to easily revisit and compare them.
-* **Built-in Gallery & Paper Viewer**: Includes a gallery of example images and a PDF viewer to display associated research or documentation.
+## Quickstart
+1. Install Python 3.8+ and clone this repo.
+2. (Recommended) create a virtual environment:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate  # Windows: .\.venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Launch the app:
+   ```bash
+   streamlit run streamlit_app.py
+   ```
+   Streamlit will open a browser tab automatically.
 
-## Setup and Installation
+## Using the App
+- **Generator tab**: Pick the number of polygon sides, spiral offset, color theme, and what to display/fill. Toggle reverse rotation, dark mode, and line thickness behavior.
+- **History tab**: View and restore the last 21 generated figures from this session.
+- **Data tab**: Inspect the coordinate tables and derived values produced by `Calculation`.
+- **Bézier Playground**: Focus on the Bézier curve generated from the polygon spiral’s control points.
+- **Gallery tab**: Browse example renders from `images/gallery/`.
+- **Paper tab**: Read the included PDF (`paper/paper.pdf`) without leaving the app.
 
-To run this application on your local machine, follow these steps:
+## Project Structure
+- `streamlit_app.py` – Streamlit UI, plotting logic, and tab layout
+- `calculation.py` – Math core for polygon geometry, spirals, and Bézier control points
+- `images/gallery/` – Sample renders displayed in the Gallery tab
+- `images/icon/icon.png` – App icon
+- `paper/paper.pdf` (+ `paper/paper-*.jpg`) – Paper shown in the Paper tab
+- `.streamlit/config.toml` – Streamlit theme defaults
 
-### Prerequisites
+## Screenshots
+Place the provided images under `assets/` and they will render below:
 
-* Python 3.8 or higher.
+![Generator – light](assets/generator-light.png)
+![Generator – dark](assets/generator-dark.png)
+![History](assets/history.png)
+![Gallery – light](assets/gallery-light.png)
+![Gallery – dark](assets/gallery-dark.png)
+![Data](assets/data.png)
+![Bézier playground](assets/playground.png)
+![Paper](assets/paper.png)
+![Acknowledgements](assets/acknowledgements.png)
+![Help](assets/help.png)
 
-### Installation
-
-1.  **Clone the repository:**
-    ```
-    git clone <your-repository-url>
-    cd <your-repository-folder>
-    ```
-
-2.  **Create and activate a virtual environment (recommended):**
-    ```
-    # For Windows
-    python -m venv venv
-    .\venv\Scripts\activate
-
-    # For macOS/Linux
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
-
-3.  **Install the required dependencies:**
-    The project relies on a few key libraries. Create a `requirements.txt` file with the following content:
-    ```
-    streamlit
-    numpy
-    pandas
-    matplotlib
-    ```
-    Then, install them using pip:
-    ```
-    pip install -r requirements.txt
-    ```
-
-4.  **Run the Streamlit application:**
-    Ensure your `main.py` and `calculs.py` files are in the same directory. Then run the following command in your terminal:
-    ```
-    streamlit run main.py
-    ```
-    The application should automatically open in a new tab in your web browser.
-
-## File Structure
-
-* `main.py`: The main Streamlit application script. It handles the user interface, session state, and calls the plotting logic.
-* `calculation.py`: A module containing the `Calculation` class, which performs all the mathematical computations for generating polygon vertices, spiral points, and Bézier curve data.
-* `paper/paper.pdf`: A PDF document that can be downloaded in the "Paper" tab.
-* `images/gallery/`: A directory to store images for the "Gallery" tab.
-
-## How to Use
-
-1.  Open the application by running `streamlit run main.py`.
-2.  Adjust the parameters in the sidebar on the left (e.g., Number of sides, Spiral offset, Color Theme).
-3.  Click the **"Generate Art"** button to create a new figure.
-4.  The generated image will appear in the **"Generator"** tab.
-5.  Navigate through the other tabs (`History`, `Data`, `Bezier Playground`, etc.) to explore the different features of the application.
-
-## Author
-
-This project was created by **Maxime Chevillard**.
+## License
+Distributed under the MIT License. See `LICENSE` for details.
