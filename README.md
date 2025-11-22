@@ -2,6 +2,13 @@
 
 Nautilus is an interactive Streamlit app for exploring nested polygons, spirals, and Bézier curves. Adjust a few controls and the app produces colorful geometric art while exposing the underlying math.
 
+<table>
+  <tr>
+    <td><img src="assets/Generator-light.png" alt="Generator light mode" /></td>
+    <td><img src="assets/generator-dark.png" alt="Generator dark mode" /></td>
+  </tr>
+</table>
+
 ## Highlights
 - Interactive generator with controls for polygon count, spiral offset, fill/outline visibility, and dark/light mode
 - Multiple color themes plus two random palettes for happy accidents
