@@ -51,7 +51,6 @@ Nautilus is an interactive Streamlit app for exploring nested polygons, spirals,
 - `.streamlit/config.toml` – Streamlit theme defaults
 
 ## Screenshots
-Place the provided images under `assets/` and they will render below:
 
 <table>
  <tr>
