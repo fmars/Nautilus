@@ -23,9 +23,10 @@ class Calculation:
         self.inner_angles = self.get_inner_angles()
         self.outer_angles = self.get_outer_angles()
         self.d_rho, self.sd_rho, self.rots = self.get_rotations()
-        
+
+        # I tried another way to calculate pi using areas, but it wasn’t very accurate, so I left that column out.
         # self.aires = self.get_aires() 
-        self.pis = self.get_approx_pi() # approximation pi dans excel
+        # self.pis = self.get_approx_pi() 
 
         self.hyps, self.pgons, self.centres = self.get_polygons()
 
@@ -107,12 +108,12 @@ class Calculation:
         return delta_rho, somme_delta_rho, rots_fin
 
 
-    def get_approx_pi(self):
-        approx_pis = []
-        for i in self.ns:
-            pi_approx = i * np.sin(np.pi / i)
-            approx_pis.append(round(pi_approx, 10)) 
-        return approx_pis
+    # def get_approx_pi(self):
+    #     approx_pis = []
+    #     for i in self.ns:
+    #         pi_approx = i * np.sin(np.pi / i)
+    #         approx_pis.append(round(pi_approx, 10)) 
+    #     return approx_pis
 
     def get_polygons(self):
         polygons = []
@@ -188,6 +189,7 @@ class Calculation:
         return xs, ys
 
     def get_dict_1(self):
+        # To include in the dict if including pi approx in get info "Pi approx.": self.pis
         dict_1 = {
             "Inner radius": self.in_radii,
             "Outer radius": self.out_radii,
@@ -197,7 +199,6 @@ class Calculation:
             "Sum delta rho": self.sd_rho,
             "Final rotation": self.rots,
             "Distances": self.hyps,
-            "Pi approx.": self.pis
             }
         return dict_1
 
