@@ -4,7 +4,7 @@ Nautilus is an interactive Streamlit app for exploring nested polygons, spirals,
 
 <table>
   <tr>
-    <td><img src="assets/Generator-light.png" alt="Generator light mode" /></td>
+    <td><img src="assets/generator-light.png" alt="Generator light mode" /></td>
     <td><img src="assets/generator-dark.png" alt="Generator dark mode" /></td>
   </tr>
 </table>
