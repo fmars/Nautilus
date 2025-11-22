@@ -1165,27 +1165,27 @@ def main():
     with tabs[5]:
         try:
             # Add download button for the PDF
-            with open("./paper/paper.pdf", "rb") as pdf_file:
+            with open("./paper/Chevillard_M_2025_Nautilus.pdf", "rb") as pdf_file:
                 PDFbyte = pdf_file.read()
 
             st.download_button(
                 label="Download Paper (PDF)",
                 data=PDFbyte,
-                file_name="nautilus-paper.pdf",
+                file_name="Chevillard_M_2025_Nautilus.pdf",
                 mime="application/pdf",
             )
         except FileNotFoundError:
-            st.warning("`paper.pdf` not found. Download button is unavailable.")
+            st.warning("`Chevillard_M_2025_Nautilus.pdf` not found. Download button is unavailable.")
         except Exception as e:
             st.error(f"Error reading PDF for download: {e}")
 
         # Display 6 JPGs
         st.markdown("### Paper Preview")
 
-        num_pages = 6
+        num_pages = 7
         for i in range(1, num_pages + 1):
             # Assume paper images are in the paper folder
-            image_path = f"./paper/paper-{i}.jpg"
+            image_path = f"./paper/page-{i}.jpg"
             try:
                 st.image(image_path, width="stretch")
             except Exception:
