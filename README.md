@@ -9,7 +9,6 @@ Nautilus is an interactive web application for creating generative art based on 
 * **Multiple Display Elements**: Choose to display various components of the figure, including polygons, inscribed/circumscribed circles, the main polygon spiral, and the resulting Bézier curve.
 * **Dedicated Playgrounds**:
     * **Bézier Playground**: Isolate and experiment with the Bézier curve generated from the polygon spiral's control points.
-    * **Logarithmic Spiral Explorer**: Plot and visualize classic logarithmic spirals by adjusting growth factors and turns.
 * **Data Viewer**: Inspect the raw numerical data, including vertex coordinates and geometric properties, for each generated figure.
 * **Generation History**: The app automatically saves your last 21 creations in a session, allowing you to easily revisit and compare them.
 * **Built-in Gallery & Paper Viewer**: Includes a gallery of example images and a PDF viewer to display associated research or documentation.
@@ -65,8 +64,8 @@ To run this application on your local machine, follow these steps:
 
 * `main.py`: The main Streamlit application script. It handles the user interface, session state, and calls the plotting logic.
 * `calculation.py`: A module containing the `Calculation` class, which performs all the mathematical computations for generating polygon vertices, spiral points, and Bézier curve data.
-* `paper.pdf` (Optional): A PDF document that can be displayed in the "Paper" tab.
-* `gallery/` (Optional): A directory to store images for the "Gallery" tab.
+* `paper/paper.pdf`: A PDF document that can be downloaded in the "Paper" tab.
+* `images/gallery/`: A directory to store images for the "Gallery" tab.
 
 ## How to Use
 
