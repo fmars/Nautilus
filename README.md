@@ -79,6 +79,3 @@ To run this application on your local machine, follow these steps:
 ## Author
 
 This project was created by **Maxime Chevillard**.
-
-
-I don't want my repository deleted.
