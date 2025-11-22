@@ -53,14 +53,24 @@ Nautilus is an interactive Streamlit app for exploring nested polygons, spirals,
 ## Screenshots
 Place the provided images under `assets/` and they will render below:
 
-![Generator](assets/generator.png)
-![History](assets/history.png)
-![Data](assets/data.png)
-![Gallery – light](assets/gallery.png)
-![Bézier playground](assets/playground.png)
-![Paper](assets/paper.png)
-![Help](assets/help.png)
-![Acknowledgements](assets/acknowledgements.png)
+<table>
+ <tr>
+  <td><img src="assets/generator.png" alt="Generator" /></td>
+  <td><img src="assets/history.png" alt="History" /></td>
+ </tr>
+ <tr>
+  <td><img src="assets/data.png" alt="Data" /></td>
+  <td><img src="assets/gallery.png" alt="Gallery" /></td>
+ </tr>
+ <tr>
+  <td><img src="assets/playground.png" alt="Bézier playground" /></td>
+  <td><img src="assets/paper.png" alt="Paper" /></td>
+ </tr>
+ <tr>
+  <td><img src="assets/help.png" alt="Help" /></td>
+  <td><img src="assets/acknowledgements.png" alt="Acknowledgements" /></td>
+ </tr>
+</table>
 
 ## License
 Distributed under the MIT License. See `LICENSE` for details.
