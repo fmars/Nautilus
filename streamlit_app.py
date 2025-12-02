@@ -826,10 +826,10 @@ def main():
     tabs = st.tabs(
         [
             "Generator",
+            "Bézier Playground",
             "History",
             "Data",
             "Gallery",
-            "Bézier Playground",
             "Paper",
             "Help",
             "Acknowledgements & License",
@@ -902,103 +902,16 @@ def main():
                 "Adjust the settings in the sidebar and click 'Generate' to create your image."
             )
 
-    with tabs[1]:  # History
-        if "figure_history" in st.session_state and st.session_state.figure_history:
-            history_list = list(
-                st.session_state.figure_history
-            )  # Convert deque to list for easier indexing
-            num_figures = len(history_list)
-            num_rows = (num_figures + 2) // 3  # Calculate rows needed
-
-            for i in range(num_rows):
-                cols = st.columns(3)
-                for j in range(3):
-                    fig_index = i * 3 + j
-                    if fig_index < num_figures:
-                        with cols[j]:
-                            try:
-                                st.pyplot(history_list[fig_index], width="stretch")
-                            except Exception as e:
-                                st.error(
-                                    f"Error displaying history figure {fig_index + 1}: {e}"
-                                )
-                    else:
-                        # Add empty space in the last row if needed
-                        with cols[j]:
-                            st.empty()
-
-    # Data tab
-    with tabs[2]:  # Data
-        if "data" in st.session_state and st.session_state.data is not None:
-            st.markdown("### General Polygon Information")
-            # Check if df_1 exists and is a DataFrame
-            if hasattr(st.session_state.data, "df_1") and isinstance(
-                st.session_state.data.df_1, pd.DataFrame
-            ):
-                df1_to_display = st.session_state.data.df_1.copy()  # Work on a copy
-                numeric_cols_df1 = df1_to_display.select_dtypes(
-                    include=np.number
-                ).columns
-                st.dataframe(df1_to_display)
-            else:
-                st.warning(
-                    "General polygon information data (df_1) is not available or invalid."
-                )
-
-            st.markdown("### Polygon Vertex Coordinates")
-            # Check if df_2 exists and is a DataFrame
-            if hasattr(st.session_state.data, "df_2") and isinstance(
-                st.session_state.data.df_2, pd.DataFrame
-            ):
-                df2_to_display = st.session_state.data.df_2.copy()  # Work on a copy
-                numeric_cols_df2 = df2_to_display.select_dtypes(
-                    include=np.number
-                ).columns
-                st.dataframe(df2_to_display)
-            else:
-                st.warning(
-                    "Polygon vertex coordinate data (df_2) is not available or invalid."
-                )
-        else:
-            st.info("Generate an image in the 'Generator' tab to see its data here.")
-
-    # Gallery Tab
-    with tabs[3]:
-        images_path = [f"./images/gallery/image{i}.jpg" for i in range(1, 22)]
-
-        if len(images_path) == 0:
-            st.info("The gallery is empty.")
-        else:
-            num_images = len(images_path)
-            num_rows = (num_images + 2) // 3  # Calculate rows needed
-
-            for i in range(num_rows):  # Iterate through rows
-                cols = st.columns(3)
-                for j in range(3):  # Iterate through columns
-                    img_index = i * 3 + j
-                    if img_index < num_images:  # Check if image exists for this index
-                        with cols[j]:
-                            try:
-                                # Use width='stretch' for responsive images
-                                st.image(images_path[img_index], width="stretch")
-                            except Exception:
-                                # Use img_index + 1 for 1-based naming
-                                st.warning(f"Could not load image{img_index + 1}.")
-                    else:
-                        # Add empty space in the last row if needed
-                        with cols[j]:
-                            st.empty()
-
     # Bezier Playground tab
-    with tabs[4]:
+    with tabs[1]:
         # Controls above the plot
         n_poly = st.slider("Number of sides (n)", 3, 20, 15, key="n_bezier")
         ds_bezier = st.slider("Spiral Offset (ds)", 1, 2, 1, key="ds_bezier")
         iter_bezier = st.slider(
             "Bezier Subdivisions",
             0,
-            8,
             4,
+            2,
             key="iter_bezier",
             help="Number of recursive subdivisions (0 = control points only).",
         )
@@ -1160,6 +1073,97 @@ def main():
 
         except Exception as e:
             st.error(f"Error in Bezier Playground: {e}")
+
+    
+    
+    with tabs[2]:  # History
+        if "figure_history" in st.session_state and st.session_state.figure_history:
+            history_list = list(
+                st.session_state.figure_history
+            )  # Convert deque to list for easier indexing
+            num_figures = len(history_list)
+            num_rows = (num_figures + 2) // 3  # Calculate rows needed
+
+            for i in range(num_rows):
+                cols = st.columns(3)
+                for j in range(3):
+                    fig_index = i * 3 + j
+                    if fig_index < num_figures:
+                        with cols[j]:
+                            try:
+                                st.pyplot(history_list[fig_index], width="stretch")
+                            except Exception as e:
+                                st.error(
+                                    f"Error displaying history figure {fig_index + 1}: {e}"
+                                )
+                    else:
+                        # Add empty space in the last row if needed
+                        with cols[j]:
+                            st.empty()
+
+    # Data tab
+    with tabs[3]:  # Data
+        if "data" in st.session_state and st.session_state.data is not None:
+            st.markdown("### General Polygon Information")
+            # Check if df_1 exists and is a DataFrame
+            if hasattr(st.session_state.data, "df_1") and isinstance(
+                st.session_state.data.df_1, pd.DataFrame
+            ):
+                df1_to_display = st.session_state.data.df_1.copy()  # Work on a copy
+                numeric_cols_df1 = df1_to_display.select_dtypes(
+                    include=np.number
+                ).columns
+                st.dataframe(df1_to_display)
+            else:
+                st.warning(
+                    "General polygon information data (df_1) is not available or invalid."
+                )
+
+            st.markdown("### Polygon Vertex Coordinates")
+            # Check if df_2 exists and is a DataFrame
+            if hasattr(st.session_state.data, "df_2") and isinstance(
+                st.session_state.data.df_2, pd.DataFrame
+            ):
+                df2_to_display = st.session_state.data.df_2.copy()  # Work on a copy
+                numeric_cols_df2 = df2_to_display.select_dtypes(
+                    include=np.number
+                ).columns
+                st.dataframe(df2_to_display)
+            else:
+                st.warning(
+                    "Polygon vertex coordinate data (df_2) is not available or invalid."
+                )
+        else:
+            st.info("Generate an image in the 'Generator' tab to see its data here.")
+
+    # Gallery Tab
+    with tabs[4]:
+        images_path = [f"./images/gallery/image{i}.jpg" for i in range(1, 22)]
+
+        if len(images_path) == 0:
+            st.info("The gallery is empty.")
+        else:
+            num_images = len(images_path)
+            num_rows = (num_images + 2) // 3  # Calculate rows needed
+
+            for i in range(num_rows):  # Iterate through rows
+                cols = st.columns(3)
+                for j in range(3):  # Iterate through columns
+                    img_index = i * 3 + j
+                    if img_index < num_images:  # Check if image exists for this index
+                        with cols[j]:
+                            try:
+                                # Use width='stretch' for responsive images
+                                st.image(images_path[img_index], width="stretch")
+                            except Exception:
+                                # Use img_index + 1 for 1-based naming
+                                st.warning(f"Could not load image{img_index + 1}.")
+                    else:
+                        # Add empty space in the last row if needed
+                        with cols[j]:
+                            st.empty()
+
+    
 
     # Paper Tab
     with tabs[5]:
