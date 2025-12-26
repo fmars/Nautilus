@@ -73,3 +73,6 @@ Nautilus is an interactive Streamlit app for exploring nested polygons, spirals,
 
 ## License
 Distributed under the MIT License. See `LICENSE` for details.
+
+
+
