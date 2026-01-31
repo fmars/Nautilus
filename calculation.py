@@ -24,7 +24,7 @@ class Calculation:
         self.outer_angles = self.get_outer_angles()
         self.d_rho, self.sd_rho, self.rots = self.get_rotations()
 
-        # I tried another way to calculate pi using areas, but it wasn’t very accurate, so I left that column out.
+        # I tried another way to calculate pi using areas of the polygons, but it wasn’t very accurate, so I left that column out.
         # self.aires = self.get_aires() 
         # self.pis = self.get_approx_pi() 
 
